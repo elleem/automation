@@ -10,7 +10,7 @@ Version 1.0
 
 #### Feature
 
--[] Automate the creation of a folder. <br>
+-[x] Automate the creation of a folder. <br>
     write a script to create a new folder with a specified name
 
 

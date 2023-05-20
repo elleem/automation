@@ -17,8 +17,6 @@ def create_folder(folder_name):
 
 def handle_deleted_user(username):
 
-    os.chdir("")
-
     user_folder_path = f"user-docs/{username}"
     temp_folder = "temporary-folder"
 
@@ -62,7 +60,8 @@ user_folder = input("Enter the user directory: ")
 
 if user_folder in user_directories:
     base_directory = os.path.dirname(os.path.abspath(__file__))
-    folder_to_sort = f"assets/user-docs/{user_folder}"
+    folder_to_sort = os.path.join(base_directory, "user-docs", user_folder)
+
     sort_documents(folder_to_sort)
 else:
     print("Invalid user directory. Please try again.")
@@ -90,7 +89,5 @@ if __name__ == "__main__":
     create_folder(new_folder_name)
     deleted_user = "user2"
     handle_deleted_user(deleted_user)
-
-
     console = Console()
     main()

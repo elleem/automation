@@ -1,5 +1,5 @@
 from rich.console import Console
-# from rich.prompt import Prompt
+from rich.prompt import Prompt
 # from rich.table import Table
 import shutil
 # import re
@@ -62,14 +62,35 @@ if user_folder in user_directories:
     base_directory = os.path.dirname(os.path.abspath(__file__))
     folder_to_sort = os.path.join(base_directory, "user-docs", user_folder)
 
-    sort_documents(folder_to_sort)
+    temp_folder = os.path.join(base_directory, "temporary-folder")
+    files_in_temp = os.listdir(temp_folder)
+
+    if user_folder == "user2" and files_in_temp:
+        print("Files already in temporary-folder. Sorting without moving.")
+        sort_documents(temp_folder)
+    else:
+        print("Sorting files in user2 folder.")
+        sort_documents(folder_to_sort)
 else:
     print("Invalid user directory. Please try again.")
 
 
-def parse_errors():
-    pass
+def parse_errors(log_file_path, target_directory):
+    if not os.path.exists(log_file_path):
+        print(f"Log file '{log_file_path}' does not exist.")
+        return
+    errors_log = os.path.join(target_directory, "errors.log")
+    warnings_log = os.path.join(target_directory, "warnings.log")
 
+    with open (log_file_path, "r") as file:
+        for line in file:
+            if "error" in line.lower():
+                with open(errors_log, "a") as errors_file:
+                    errors_file.write(line)
+            elif "warning" in line.lower():
+                with open(warnings_log, "a") as warnings_file:
+                    warnings_file.write(line)
+    print ("Log file parsed successfully")
 
 def main():
     """Main function to run the CLI app
@@ -77,17 +98,37 @@ def main():
     return: None
     """
 
+    while True:
+        console.print("\n1. Create folder\n2. Delete user\n3.Sort documents\n4.Parse error logs\n5. Rename files")
+        choice = Prompt.ask("Choose a task(Enter the number)", choices=['1','2','3','4','5','6'], default='6')
 
+        if choice =='1':
+            folder_name = Prompt.ask("Enter the folder name")
+            create_folder(folder_name)
+        elif choice =='2':
+            username = Prompt.ask("Enter the username to handle the deleted user")
+            handle_deleted_user(username)
+        elif choice == '3':
+            folder_path = Prompt.ask("Enter the folder path to sort documents")
+            sort_documents(folder_path)
+        elif choice == '4':
+            log_file_path = Prompt.ask("Enter the log file path")
+            target_directory = Prompt.ask("Enter the target directory to save the parsed logs")
+            parse_errors(log_file_path,target_directory)
+        elif choice == '5':
+            directory = Prompt.ask("Enter the directory path to rename the files")
+            old_name = Prompt.ask("Enter the old file name")
+            new_name = Prompt.ask("Enter the new file name")
+            rename_files(directory, old_name, new_name)
 
+        elif choice == '6':
+            break
 
-    pass
+        else:
+            console.print("Invalid choice. Please try again.")
 
 
 
 if __name__ == "__main__":
-    new_folder_name = "new_stuff"
-    create_folder(new_folder_name)
-    deleted_user = "user2"
-    handle_deleted_user(deleted_user)
     console = Console()
     main()

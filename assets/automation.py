@@ -92,6 +92,19 @@ def parse_errors(log_file_path, target_directory):
                     warnings_file.write(line)
     print ("Log file parsed successfully")
 
+
+def rename_files(directory, old_name, new_name):
+    files = os.listdir(directory)
+    renamed_files = 0
+
+    for file in files:
+        if file == old_name:
+            old_file_path = os.path.join(directory, file)
+            new_file_path = os.path.join(directory, new_name)
+            os.rename(old_file_path, new_file_path)
+            renamed_files += 1
+    print(f"Renamed {renamed_files} file(s) from {old_name} to {new_name}.")
+
 def main():
     """Main function to run the CLI app
     input: user input

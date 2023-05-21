@@ -2,14 +2,14 @@ from rich.console import Console
 from rich.prompt import Prompt
 # from rich.table import Table
 import shutil
-# import re
+import re
 import os
 
 
 def create_folder(folder_name):
     try:
         os.makedirs(folder_name)
-        print(f"folder '{folder_name} created successfully.")
+        print(f"folder '{folder_name}' created successfully.")
     except FileExistsError:
         print(f"Folder '{folder_name}' already exists.")
 
@@ -50,46 +50,28 @@ def sort_documents(folder_path):
 
     print(f"Documents sorted into appropriate folders in {folder_path}.")
 
-user_directories = ["user1", "user2"]
-
-print("Do you want to sort these user directories by file type?")
-for directory in user_directories:
-    print(directory)
-
-user_folder = input("Enter the user directory: ")
-
-if user_folder in user_directories:
-    base_directory = os.path.dirname(os.path.abspath(__file__))
-    folder_to_sort = os.path.join(base_directory, "user-docs", user_folder)
-
-    temp_folder = os.path.join(base_directory, "temporary-folder")
-    files_in_temp = os.listdir(temp_folder)
-
-    if user_folder == "user2" and files_in_temp:
-        print("Files already in temporary-folder. Sorting without moving.")
-        sort_documents(temp_folder)
-    else:
-        print("Sorting files in user2 folder.")
-        sort_documents(folder_to_sort)
-else:
-    print("Invalid user directory. Please try again.")
-
 
 def parse_errors(log_file_path, target_directory):
-    if not os.path.exists(log_file_path):
-        print(f"Log file '{log_file_path}' does not exist.")
-        return
-    errors_log = os.path.join(target_directory, "errors.log")
-    warnings_log = os.path.join(target_directory, "warnings.log")
 
-    with open (log_file_path, "r") as file:
-        for line in file:
-            if "error" in line.lower():
-                with open(errors_log, "a") as errors_file:
-                    errors_file.write(line)
-            elif "warning" in line.lower():
-                with open(warnings_log, "a") as warnings_file:
-                    warnings_file.write(line)
+    if not os.path.exists(target_directory):
+        os.makedirs(target_directory)
+
+    error_regex = re.compile(r'\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}, ERROR:.*')
+    warning_regex = re.compile(r'\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}, WARNING:.*')
+
+    with open(log_file_path, 'r') as log_file:
+        lines = log_file.readlines()
+
+    errors_log_path = os.path.join(target_directory, "errors.log")
+    warnings_log_path = os.path.join(target_directory, "warnings.log")
+
+    with open (errors_log_path, "w") as errors_log_file:
+        with open(warnings_log_path, 'w') as warning_log_file:
+            for line in lines:
+                if re.match(error_regex, line):
+                    errors_log_file.write(line)
+                elif re.match(warning_regex, line):
+                    warning_log_file.write(line)
     print ("Log file parsed successfully")
 
 
@@ -129,10 +111,10 @@ def main():
             target_directory = Prompt.ask("Enter the target directory to save the parsed logs")
             parse_errors(log_file_path,target_directory)
         elif choice == '5':
-            directory = Prompt.ask("Enter the directory path to rename the files")
+            directory_path = Prompt.ask("Enter the directory path to rename the files")
             old_name = Prompt.ask("Enter the old file name")
             new_name = Prompt.ask("Enter the new file name")
-            rename_files(directory, old_name, new_name)
+            rename_files(directory_path, old_name, new_name)
 
         elif choice == '6':
             break
